@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 import os
 import shutil
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +30,10 @@ class Watchlist(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     movie_id = db.Column(db.Integer, nullable=False)
 
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 # TODO 1 : Register User
 @app.route("/register/user", methods=["POST"])
