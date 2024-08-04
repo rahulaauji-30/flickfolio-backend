@@ -4,8 +4,9 @@ import shutil
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.functions import current_user
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app=app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@localhost/movie"
 db = SQLAlchemy(app)
 
@@ -72,6 +73,20 @@ def get_user(id):
     else:
         return jsonify({"message": f"Users Not found with user id {id}"}), 404
 
+#TODO:Final
+@app.route("/check-user/<string:email>",methods=["GET"])
+def check_user(email):
+    user = Users.query.filter_by(email=email).first()
+    if user:
+        return jsonify({
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "password": user.password,
+            "photo": user.photo
+        }), 200
+    else:
+        return jsonify({"message": "Email not found in database"}), 404
 
 # TODO:3 Saving favourite movies
 @app.route("/add-to-favourite/<int:user_id>/<int:movieid>", methods=["POST"])
@@ -241,6 +256,19 @@ def remove_profile_pic(id):
             return 'Profile picture does not exist', 404
     except Exception as e:
         return jsonify({"message": "Failed to remove profile picture", "error": str(e)}), 500
+
+# Get all users
+@app.route("/get/all-users", methods=["GET"])
+def get_all_users():
+    users = Users.query.all()
+    all_users = [{
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "photo": user.photo
+    } for user in users]
+    
+    return jsonify(all_users), 200
 
 
 if __name__ == "__main__":
